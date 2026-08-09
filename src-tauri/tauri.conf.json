@@ -12,9 +12,12 @@
   "app": {
     "windows": [
       {
-        "title": "workmemory",
-        "width": 800,
-        "height": 600
+        "title": "WorkMemory",
+        "width": 900,
+        "height": 700,
+        "resizable": true,
+        "maximizable": true,
+        "center": true
       }
     ],
     "security": {
