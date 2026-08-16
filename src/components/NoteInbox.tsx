@@ -6,7 +6,11 @@ import type { DetailLevel } from '../types';
 const MAX_CHARS = 2000;
 const WARNING_THRESHOLD = 1850;
 
-function NoteInbox() {
+interface NoteInboxProps {
+  onSaved?: () => void;
+}
+
+function NoteInbox({ onSaved }: NoteInboxProps) {
   const [text, setText] = useState('');
   const [detailLevel, setDetailLevel] = useState<DetailLevel>('Quick');
   const [isSaving, setIsSaving] = useState(false);
@@ -26,6 +30,7 @@ function NoteInbox() {
       await saveNote({ rawInput: text, detailLevel });
       setText('');
       textareaRef.current?.focus();
+      onSaved?.();
     } catch {
       setError('Не вдалося зберегти нотатку. Спробуй ще раз.');
     } finally {

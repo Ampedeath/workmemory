@@ -1,6 +1,7 @@
 export type NoteType = 'Reminder' | 'Task' | 'Investigation' | 'Note' | 'Waiting' | 'Decision';
 export type NoteStatus = 'Active' | 'Done' | 'Archived' | 'Deleted';
 export type DetailLevel = 'Quick' | 'Detailed';
+export type TabName = 'Today' | 'Upcoming' | 'Waiting' | 'Later' | 'Archive';
 
 export interface WorkItem {
   id: string;
