@@ -47,7 +47,11 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
-        .invoke_handler(tauri::generate_handler![commands::notes::save_note])
+        .invoke_handler(tauri::generate_handler![
+            commands::notes::save_note,
+            commands::notes::list_notes,
+            commands::notes::update_note_status
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
