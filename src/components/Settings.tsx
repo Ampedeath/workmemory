@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getAiSettings, saveAiSettings } from '../services/ai';
 
+const INPUT_CLASS =
+  'rounded-lg border border-slate-300 p-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+
 function Settings() {
   const [baseUrl, setBaseUrl] = useState('');
   const [model, setModel] = useState('');
@@ -36,51 +39,51 @@ function Settings() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 p-4">
-      <h2 className="text-lg font-semibold text-gray-900">AI Settings</h2>
+    <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">AI Settings</h2>
 
-      <label className="flex flex-col gap-1 text-sm text-gray-700">
+      <label className="flex flex-col gap-1 text-sm text-slate-700">
         Base URL
         <input
           value={baseUrl}
           onChange={(e) => setBaseUrl(e.target.value)}
           placeholder="https://api.groq.com/openai/v1"
-          className="rounded-lg border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`${INPUT_CLASS} placeholder:text-slate-400`}
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm text-gray-700">
+      <label className="flex flex-col gap-1 text-sm text-slate-700">
         Model
         <input
           value={model}
           onChange={(e) => setModel(e.target.value)}
-          placeholder="llama-3.3-70b-versatile"
-          className="rounded-lg border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="openai/gpt-oss-20b"
+          className={`${INPUT_CLASS} placeholder:text-slate-400`}
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm text-gray-700">
-        API Key {hasApiKey && <span className="text-xs font-normal text-green-600">(configured)</span>}
+      <label className="flex flex-col gap-1 text-sm text-slate-700">
+        API Key {hasApiKey && <span className="text-xs font-normal text-emerald-600">(configured)</span>}
         <input
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           placeholder={hasApiKey ? '••••••••' : 'gsk_...'}
-          className="rounded-lg border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`${INPUT_CLASS} placeholder:text-slate-400`}
         />
       </label>
 
-      {message && <p className="text-sm text-gray-600">{message}</p>}
+      {message && <p className="text-sm text-slate-600">{message}</p>}
 
       <button
         type="button"
         onClick={handleSave}
         disabled={isSaving}
-        className="self-end rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="self-end rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSaving ? 'Saving...' : 'Save'}
       </button>
-    </div>
+    </section>
   );
 }
 
