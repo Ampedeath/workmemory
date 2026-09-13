@@ -27,4 +27,5 @@ uuid = { version = "1.24.1", features = ["v4"] }
 chrono = "0.4.45"
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio"] }
 reqwest = { version = "0.13.4", default-features = false, features = ["json", "rustls"] }
+tokio = { version = "1.53.1", features = ["time", "rt"] }
 
