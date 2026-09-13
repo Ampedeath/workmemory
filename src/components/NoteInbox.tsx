@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { listen } from '@tauri-apps/api/event';
 import DetailLevelToggle from './DetailLevelToggle';
 import { useNotes } from '../hooks/useNotes';
 import { formatNote } from '../services/ai';
@@ -44,6 +45,15 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
   const charCount = text.length;
   const isOverLimit = charCount >= MAX_CHARS;
   const isNearLimit = charCount >= WARNING_THRESHOLD;
+
+  useEffect(() => {
+    const unlisten = listen('focus-note-inbox', () => {
+      textareaRef.current?.focus();
+    });
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, []);
 
   function resetForm() {
     setText('');
