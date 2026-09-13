@@ -53,8 +53,8 @@ function NoteList({ refreshTrigger }: NoteListProps) {
         ))}
       </div>
 
-      {isLoading && <p className="text-sm text-gray-400">Завантаження...</p>}
-      {!isLoading && items.length === 0 && <p className="text-sm text-gray-400">Порожньо</p>}
+      {isLoading && <p className="text-sm text-gray-400">Loading...</p>}
+      {!isLoading && items.length === 0 && <p className="text-sm text-gray-400">No notes yet.</p>}
 
       <div className="flex flex-col gap-2">
         {items.map((item) => (

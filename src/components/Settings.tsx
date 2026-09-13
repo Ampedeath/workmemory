@@ -26,10 +26,10 @@ function Settings() {
     try {
       await saveAiSettings({ baseUrl, apiKey, model });
       setApiKey('');
-      setMessage('Збережено.');
+      setMessage('Saved.');
       await loadSettings();
     } catch {
-      setMessage('Не вдалося зберегти налаштування.');
+      setMessage('Failed to save settings.');
     } finally {
       setIsSaving(false);
     }
@@ -60,7 +60,7 @@ function Settings() {
       </label>
 
       <label className="flex flex-col gap-1 text-sm text-gray-700">
-        API Key {hasApiKey && <span className="text-xs font-normal text-green-600">(налаштовано)</span>}
+        API Key {hasApiKey && <span className="text-xs font-normal text-green-600">(configured)</span>}
         <input
           type="password"
           value={apiKey}

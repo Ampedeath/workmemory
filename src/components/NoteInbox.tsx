@@ -138,7 +138,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         disabled={isBusy || stage === 'preview'}
-        placeholder="Що сталось? (Ctrl+Enter — обробити через AI)"
+        placeholder="Enter your note... (Ctrl+Enter to process with AI)"
         className="h-40 w-full resize-none rounded-lg border border-gray-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
       />
 
@@ -173,7 +173,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
 
       {stage === 'preview' && preview && (
         <div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-blue-700">AI-результат — перевір і збережи</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-blue-700">AI result — review and save</p>
 
           <label className="flex flex-col gap-1 text-sm text-gray-700">
             Title
@@ -200,7 +200,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
           </label>
 
           <label className="flex flex-col gap-1 text-sm text-gray-700">
-            Due at (ISO 8601 UTC, або порожньо)
+            Due at (ISO 8601 UTC, or leave empty)
             <input
               value={preview.dueAt}
               onChange={(e) => setPreview({ ...preview, dueAt: e.target.value })}
@@ -219,7 +219,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
           </label>
 
           <label className="flex flex-col gap-1 text-sm text-gray-700">
-            Tags (через кому, до 3)
+            Tags (comma-separated, up to 3)
             <input
               value={preview.tags}
               onChange={(e) => setPreview({ ...preview, tags: e.target.value })}
@@ -266,7 +266,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
           disabled={!text.trim() || isOverLimit || isBusy}
           className="self-end rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {stage === 'formatting' ? 'Обробка через AI...' : stage === 'saving' ? 'Збереження...' : 'Format'}
+          {stage === 'formatting' ? 'Processing with AI...' : stage === 'saving' ? 'Saving...' : 'Format'}
         </button>
       )}
     </div>
