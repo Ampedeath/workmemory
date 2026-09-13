@@ -12,6 +12,13 @@ use crate::DB_URL;
 pub struct SaveNotePayload {
     pub raw_input: String,
     pub detail_level: String,
+    pub title: Option<String>,
+    #[serde(rename = "type")]
+    pub item_type: Option<String>,
+    pub due_at: Option<String>,
+    pub action: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub context: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -54,17 +61,28 @@ pub async fn save_note(
 
     let id = Uuid::new_v4().to_string();
     let now = Utc::now().to_rfc3339();
-    let title: String = payload.raw_input.chars().take(60).collect();
+
+    let title = payload
+        .title
+        .unwrap_or_else(|| payload.raw_input.chars().take(60).collect());
+    let item_type = payload.item_type.unwrap_or_else(|| "Note".to_string());
+    let tags = payload.tags.unwrap_or_default();
+    let tags_json = serde_json::to_string(&tags).unwrap_or_else(|_| "[]".to_string());
 
     sqlx::query(
         "INSERT INTO work_items
             (id, raw_input, detail_level, title, type, status, context, action, tags, due_at, created_at, updated_at, archived_at)
-         VALUES (?, ?, ?, ?, 'Note', 'Active', NULL, NULL, '[]', NULL, ?, ?, NULL)",
+         VALUES (?, ?, ?, ?, ?, 'Active', ?, ?, ?, ?, ?, ?, NULL)",
     )
     .bind(&id)
     .bind(&payload.raw_input)
     .bind(&payload.detail_level)
     .bind(&title)
+    .bind(&item_type)
+    .bind(&payload.context)
+    .bind(&payload.action)
+    .bind(&tags_json)
+    .bind(&payload.due_at)
     .bind(&now)
     .bind(&now)
     .execute(pool)
@@ -76,12 +94,12 @@ pub async fn save_note(
         raw_input: payload.raw_input,
         detail_level: payload.detail_level,
         title,
-        item_type: "Note".to_string(),
+        item_type,
         status: "Active".to_string(),
-        context: None,
-        action: None,
-        tags: vec![],
-        due_at: None,
+        context: payload.context,
+        action: payload.action,
+        tags,
+        due_at: payload.due_at,
         created_at: now.clone(),
         updated_at: now,
         archived_at: None,

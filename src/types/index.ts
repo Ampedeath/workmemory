@@ -3,6 +3,21 @@ export type NoteStatus = 'Active' | 'Done' | 'Archived' | 'Deleted';
 export type DetailLevel = 'Quick' | 'Detailed';
 export type TabName = 'Today' | 'Upcoming' | 'Waiting' | 'Later' | 'Archive';
 
+export interface FormattedNote {
+  title: string;
+  type: NoteType;
+  dueAt: string | null;
+  action: string | null;
+  tags: string[];
+  context: string | null;
+}
+
+export interface AiSettings {
+  baseUrl: string;
+  model: string;
+  hasApiKey: boolean;
+}
+
 export interface WorkItem {
   id: string;
   rawInput: string;
