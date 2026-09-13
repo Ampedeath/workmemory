@@ -50,7 +50,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::notes::save_note,
             commands::notes::list_notes,
-            commands::notes::update_note_status
+            commands::notes::update_note_status,
+            commands::ai::format_note,
+            commands::ai::save_ai_settings,
+            commands::ai::get_ai_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

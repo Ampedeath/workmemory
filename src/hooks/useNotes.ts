@@ -1,10 +1,16 @@
 import { useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import type { DetailLevel, NoteStatus, TabName, WorkItem } from '../types';
+import type { DetailLevel, NoteStatus, NoteType, TabName, WorkItem } from '../types';
 
 interface SaveNoteInput {
   rawInput: string;
   detailLevel: DetailLevel;
+  title?: string;
+  type?: NoteType;
+  dueAt?: string | null;
+  action?: string | null;
+  tags?: string[];
+  context?: string | null;
 }
 
 export function useNotes() {
