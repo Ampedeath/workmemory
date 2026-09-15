@@ -11,18 +11,20 @@ export const TYPE_COLOR: Record<NoteType, { dot: string; accent: string }> = {
 
 interface NoteCardProps {
   item: WorkItem;
+  onOpen: (item: WorkItem) => void;
   onMarkDone: (id: string) => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-function NoteCard({ item, onMarkDone, onArchive, onDelete }: NoteCardProps) {
+function NoteCard({ item, onOpen, onMarkDone, onArchive, onDelete }: NoteCardProps) {
   const isOverdue = item.status === 'Active' && item.dueAt !== null && new Date(item.dueAt) < new Date();
   const isActive = item.status === 'Active';
 
   return (
     <div
-      className={`flex items-start gap-3 rounded-xl border border-l-4 p-3 shadow-sm transition-shadow hover:shadow-md ${
+      onClick={() => onOpen(item)}
+      className={`flex cursor-pointer items-start gap-3 rounded-xl border border-l-4 p-3 shadow-sm transition-shadow hover:shadow-md ${
         isOverdue
           ? 'border-red-300 border-l-red-400 bg-red-50'
           : `border-slate-200 bg-white ${TYPE_COLOR[item.type].accent}`
@@ -44,7 +46,10 @@ function NoteCard({ item, onMarkDone, onArchive, onDelete }: NoteCardProps) {
           <>
             <button
               type="button"
-              onClick={() => onMarkDone(item.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onMarkDone(item.id);
+              }}
               title="Mark as Done"
               className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-emerald-100 hover:text-emerald-600"
             >
@@ -54,7 +59,10 @@ function NoteCard({ item, onMarkDone, onArchive, onDelete }: NoteCardProps) {
             </button>
             <button
               type="button"
-              onClick={() => onArchive(item.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onArchive(item.id);
+              }}
               title="Archive"
               className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
             >
@@ -68,7 +76,10 @@ function NoteCard({ item, onMarkDone, onArchive, onDelete }: NoteCardProps) {
         )}
         <button
           type="button"
-          onClick={() => onDelete(item.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(item.id);
+          }}
           title="Delete"
           className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-red-100 hover:text-red-600"
         >

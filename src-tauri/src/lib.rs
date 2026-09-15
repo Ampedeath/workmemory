@@ -61,6 +61,7 @@ pub fn run() {
             commands::notes::save_note,
             commands::notes::list_notes,
             commands::notes::update_note_status,
+            commands::notes::update_note,
             commands::ai::format_note,
             commands::ai::save_ai_settings,
             commands::ai::get_ai_settings
