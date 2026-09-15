@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getAiSettings, saveAiSettings } from '../services/ai';
+import { getAutostartEnabled, setAutostartEnabled } from '../services/settings';
 
 const INPUT_CLASS =
   'rounded-lg border border-slate-300 p-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500';
@@ -12,8 +13,12 @@ function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const [autostart, setAutostart] = useState(false);
+  const [isTogglingAutostart, setIsTogglingAutostart] = useState(false);
+
   useEffect(() => {
     void loadSettings();
+    void getAutostartEnabled().then(setAutostart);
   }, []);
 
   async function loadSettings() {
@@ -38,52 +43,94 @@ function Settings() {
     }
   }
 
+  async function handleToggleAutostart() {
+    const next = !autostart;
+    setIsTogglingAutostart(true);
+    try {
+      await setAutostartEnabled(next);
+      setAutostart(next);
+    } catch {
+      // leave the toggle at its previous state on failure
+    } finally {
+      setIsTogglingAutostart(false);
+    }
+  }
+
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">AI Settings</h2>
+    <div className="flex flex-col gap-6">
+      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">General</h2>
 
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
-        Base URL
-        <input
-          value={baseUrl}
-          onChange={(e) => setBaseUrl(e.target.value)}
-          placeholder="https://api.groq.com/openai/v1"
-          className={`${INPUT_CLASS} placeholder:text-slate-400`}
-        />
-      </label>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-sm text-slate-700">Launch on system startup</span>
+            <span className="text-xs text-slate-400">Start WorkMemory automatically when you log in</span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autostart}
+            onClick={() => void handleToggleAutostart()}
+            disabled={isTogglingAutostart}
+            className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+              autostart ? 'bg-indigo-600' : 'bg-slate-300'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                autostart ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+      </section>
 
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
-        Model
-        <input
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          placeholder="openai/gpt-oss-20b"
-          className={`${INPUT_CLASS} placeholder:text-slate-400`}
-        />
-      </label>
+      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">AI Settings</h2>
 
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
-        API Key {hasApiKey && <span className="text-xs font-normal text-emerald-600">(configured)</span>}
-        <input
-          type="password"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          placeholder={hasApiKey ? '••••••••' : 'gsk_...'}
-          className={`${INPUT_CLASS} placeholder:text-slate-400`}
-        />
-      </label>
+        <label className="flex flex-col gap-1 text-sm text-slate-700">
+          Base URL
+          <input
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
+            placeholder="https://api.groq.com/openai/v1"
+            className={`${INPUT_CLASS} placeholder:text-slate-400`}
+          />
+        </label>
 
-      {message && <p className="text-sm text-slate-600">{message}</p>}
+        <label className="flex flex-col gap-1 text-sm text-slate-700">
+          Model
+          <input
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            placeholder="openai/gpt-oss-20b"
+            className={`${INPUT_CLASS} placeholder:text-slate-400`}
+          />
+        </label>
 
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={isSaving}
-        className="self-end rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {isSaving ? 'Saving...' : 'Save'}
-      </button>
-    </section>
+        <label className="flex flex-col gap-1 text-sm text-slate-700">
+          API Key {hasApiKey && <span className="text-xs font-normal text-emerald-600">(configured)</span>}
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder={hasApiKey ? '••••••••' : 'gsk_...'}
+            className={`${INPUT_CLASS} placeholder:text-slate-400`}
+          />
+        </label>
+
+        {message && <p className="text-sm text-slate-600">{message}</p>}
+
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="self-end rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isSaving ? 'Saving...' : 'Save'}
+        </button>
+      </section>
+    </div>
   );
 }
 

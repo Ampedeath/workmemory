@@ -4,6 +4,7 @@ import DetailLevelToggle from './DetailLevelToggle';
 import { useNotes } from '../hooks/useNotes';
 import { formatNote } from '../services/ai';
 import type { DetailLevel, NoteType } from '../types';
+import { datetimeLocalToIsoUtc, isoUtcToDatetimeLocal } from '../utils/datetime';
 
 const MAX_CHARS = 2000;
 const WARNING_THRESHOLD = 1850;
@@ -72,7 +73,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
       setPreview({
         title: result.title,
         type: result.type,
-        dueAt: result.dueAt ?? '',
+        dueAt: isoUtcToDatetimeLocal(result.dueAt),
         action: result.action ?? '',
         tags: result.tags.join(', '),
         context: result.context ?? '',
@@ -93,7 +94,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
         detailLevel,
         title: preview.title,
         type: preview.type,
-        dueAt: preview.dueAt.trim() || null,
+        dueAt: datetimeLocalToIsoUtc(preview.dueAt),
         action: preview.action.trim() || null,
         tags: preview.tags
           .split(',')
@@ -214,12 +215,12 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
           </label>
 
           <label className="flex flex-col gap-1 text-sm text-slate-700">
-            Due at (ISO 8601 UTC, or leave empty)
+            Due at
             <input
+              type="datetime-local"
               value={preview.dueAt}
               onChange={(e) => setPreview({ ...preview, dueAt: e.target.value })}
-              placeholder="2026-08-24T10:00:00Z"
-              className={`${INPUT_CLASS} placeholder:text-slate-400`}
+              className={INPUT_CLASS}
             />
           </label>
 

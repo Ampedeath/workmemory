@@ -61,9 +61,12 @@ pub fn run() {
             commands::notes::save_note,
             commands::notes::list_notes,
             commands::notes::update_note_status,
+            commands::notes::update_note,
             commands::ai::format_note,
             commands::ai::save_ai_settings,
-            commands::ai::get_ai_settings
+            commands::ai::get_ai_settings,
+            commands::settings::get_autostart_enabled,
+            commands::settings::set_autostart_enabled
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

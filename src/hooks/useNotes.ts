@@ -13,6 +13,16 @@ interface SaveNoteInput {
   context?: string | null;
 }
 
+interface UpdateNoteInput {
+  id: string;
+  title: string;
+  type: NoteType;
+  dueAt: string | null;
+  action: string | null;
+  tags: string[];
+  context: string | null;
+}
+
 export function useNotes() {
   const saveNote = useCallback(async (input: SaveNoteInput): Promise<WorkItem> => {
     return invoke<WorkItem>('save_note', { payload: input });
@@ -26,5 +36,9 @@ export function useNotes() {
     return invoke<void>('update_note_status', { payload: { id, status } });
   }, []);
 
-  return { saveNote, listNotes, updateNoteStatus };
+  const updateNote = useCallback(async (input: UpdateNoteInput): Promise<WorkItem> => {
+    return invoke<WorkItem>('update_note', { payload: input });
+  }, []);
+
+  return { saveNote, listNotes, updateNoteStatus, updateNote };
 }

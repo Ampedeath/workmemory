@@ -29,6 +29,19 @@ pub struct UpdateStatusPayload {
     pub status: String,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateNotePayload {
+    pub id: String,
+    pub title: String,
+    #[serde(rename = "type")]
+    pub item_type: String,
+    pub due_at: Option<String>,
+    pub action: Option<String>,
+    pub tags: Vec<String>,
+    pub context: Option<String>,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkItem {
@@ -208,4 +221,67 @@ pub async fn update_note_status(
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub async fn update_note(
+    app: AppHandle,
+    db_instances: State<'_, DbInstances>,
+    payload: UpdateNotePayload,
+) -> Result<WorkItem, String> {
+    let instances = db_instances.0.read().await;
+    let db = instances
+        .get(DB_URL)
+        .ok_or_else(|| "Database not loaded".to_string())?;
+
+    let DbPool::Sqlite(pool) = db;
+
+    let now = Utc::now().to_rfc3339();
+    let tags_json = serde_json::to_string(&payload.tags).unwrap_or_else(|_| "[]".to_string());
+
+    sqlx::query(
+        "UPDATE work_items
+            SET title = ?, type = ?, due_at = ?, action = ?, tags = ?, context = ?, updated_at = ?
+         WHERE id = ?",
+    )
+    .bind(&payload.title)
+    .bind(&payload.item_type)
+    .bind(&payload.due_at)
+    .bind(&payload.action)
+    .bind(&tags_json)
+    .bind(&payload.context)
+    .bind(&now)
+    .bind(&payload.id)
+    .execute(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    let row = sqlx::query(
+        "SELECT id, raw_input, detail_level, title, type, status, context, action, tags, due_at, created_at, updated_at, archived_at
+         FROM work_items WHERE id = ?",
+    )
+    .bind(&payload.id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    let item = row_to_work_item(&row).map_err(|e| e.to_string())?;
+
+    if item.status == "Active" {
+        match item
+            .due_at
+            .as_deref()
+            .and_then(|s| DateTime::parse_from_rfc3339(s).ok())
+        {
+            Some(due_at) => reminders::schedule_reminder(
+                &app,
+                item.id.clone(),
+                item.title.clone(),
+                due_at.with_timezone(&Utc),
+            ),
+            None => reminders::cancel_reminder(&app, &item.id),
+        }
+    }
+
+    Ok(item)
 }
