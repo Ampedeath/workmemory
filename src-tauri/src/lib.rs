@@ -1,8 +1,8 @@
 mod commands;
 
+use tauri::{Emitter, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut, ShortcutState};
-use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_sql::{Builder as SqlBuilder, Migration, MigrationKind};
 use tauri_plugin_store::Builder as StoreBuilder;
 
@@ -36,17 +36,27 @@ pub fn run() {
                 .expect("failed to register Ctrl+Shift+N shortcut")
                 .with_handler(move |app, shortcut, event| {
                     if shortcut == &quick_capture_shortcut && event.state == ShortcutState::Pressed {
-                        let _ = app
-                            .notification()
-                            .builder()
-                            .title("WorkMemory")
-                            .body("Global shortcut Ctrl+Shift+N works!")
-                            .show();
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                            let _ = window.unminimize();
+                            let _ = window.set_focus();
+                            let _ = window.emit("focus-note-inbox", ());
+                        }
                     }
                 })
                 .build(),
         )
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
+        .setup(|app| {
+            app.manage(commands::reminders::ReminderRegistry::default());
+
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                let _ = commands::reminders::reschedule_active(&app_handle).await;
+            });
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             commands::notes::save_note,
             commands::notes::list_notes,

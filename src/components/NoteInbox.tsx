@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { listen } from '@tauri-apps/api/event';
 import DetailLevelToggle from './DetailLevelToggle';
 import { useNotes } from '../hooks/useNotes';
 import { formatNote } from '../services/ai';
@@ -29,6 +30,9 @@ interface NoteInboxProps {
   onSaved?: () => void;
 }
 
+const INPUT_CLASS =
+  'rounded-lg border border-slate-300 p-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+
 function NoteInbox({ onSaved }: NoteInboxProps) {
   const [text, setText] = useState('');
   const [detailLevel, setDetailLevel] = useState<DetailLevel>('Quick');
@@ -41,6 +45,15 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
   const charCount = text.length;
   const isOverLimit = charCount >= MAX_CHARS;
   const isNearLimit = charCount >= WARNING_THRESHOLD;
+
+  useEffect(() => {
+    const unlisten = listen('focus-note-inbox', () => {
+      textareaRef.current?.focus();
+    });
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, []);
 
   function resetForm() {
     setText('');
@@ -130,7 +143,9 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
   const isBusy = stage === 'formatting' || stage === 'saving';
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 p-4">
+    <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">New note</h2>
+
       <textarea
         ref={textareaRef}
         autoFocus
@@ -138,18 +153,15 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         disabled={isBusy || stage === 'preview'}
-        placeholder="Що сталось? (Ctrl+Enter — обробити через AI)"
-        className="h-40 w-full resize-none rounded-lg border border-gray-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+        placeholder="Enter your note... (Ctrl+Enter to process with AI)"
+        className="h-40 w-full resize-none rounded-lg border border-slate-300 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
       />
 
       <div className="flex items-center justify-between">
-        <DetailLevelToggle
-          value={detailLevel}
-          onChange={setDetailLevel}
-        />
+        <DetailLevelToggle value={detailLevel} onChange={setDetailLevel} />
         <span
           className={`text-xs ${
-            isOverLimit ? 'font-semibold text-red-600' : isNearLimit ? 'text-orange-500' : 'text-gray-400'
+            isOverLimit ? 'font-semibold text-red-600' : isNearLimit ? 'text-orange-500' : 'text-slate-400'
           }`}
         >
           {charCount} / {MAX_CHARS}
@@ -172,24 +184,26 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
       )}
 
       {stage === 'preview' && preview && (
-        <div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-blue-700">AI-результат — перевір і збережи</p>
+        <div className="flex flex-col gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            AI result — review and save
+          </p>
 
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
+          <label className="flex flex-col gap-1 text-sm text-slate-700">
             Title
             <input
               value={preview.title}
               onChange={(e) => setPreview({ ...preview, title: e.target.value })}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
+              className={INPUT_CLASS}
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
+          <label className="flex flex-col gap-1 text-sm text-slate-700">
             Type
             <select
               value={preview.type}
               onChange={(e) => setPreview({ ...preview, type: e.target.value as NoteType })}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
+              className={INPUT_CLASS}
             >
               {NOTE_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -199,41 +213,41 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
             </select>
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
-            Due at (ISO 8601 UTC, або порожньо)
+          <label className="flex flex-col gap-1 text-sm text-slate-700">
+            Due at (ISO 8601 UTC, or leave empty)
             <input
               value={preview.dueAt}
               onChange={(e) => setPreview({ ...preview, dueAt: e.target.value })}
               placeholder="2026-08-24T10:00:00Z"
-              className="rounded-lg border border-gray-300 p-2 text-sm"
+              className={`${INPUT_CLASS} placeholder:text-slate-400`}
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
+          <label className="flex flex-col gap-1 text-sm text-slate-700">
             Action
             <input
               value={preview.action}
               onChange={(e) => setPreview({ ...preview, action: e.target.value })}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
+              className={INPUT_CLASS}
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
-            Tags (через кому, до 3)
+          <label className="flex flex-col gap-1 text-sm text-slate-700">
+            Tags (comma-separated, up to 3)
             <input
               value={preview.tags}
               onChange={(e) => setPreview({ ...preview, tags: e.target.value })}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
+              className={INPUT_CLASS}
             />
           </label>
 
           {detailLevel === 'Detailed' && (
-            <label className="flex flex-col gap-1 text-sm text-gray-700">
+            <label className="flex flex-col gap-1 text-sm text-slate-700">
               Context
               <textarea
                 value={preview.context}
                 onChange={(e) => setPreview({ ...preview, context: e.target.value })}
-                className="h-20 resize-none rounded-lg border border-gray-300 p-2 text-sm"
+                className={`h-20 resize-none ${INPUT_CLASS}`}
               />
             </label>
           )}
@@ -243,7 +257,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
               type="button"
               onClick={handleCancelPreview}
               disabled={stage !== 'preview'}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -251,7 +265,7 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
               type="button"
               onClick={handleConfirmSave}
               disabled={stage !== 'preview'}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Save
             </button>
@@ -264,12 +278,12 @@ function NoteInbox({ onSaved }: NoteInboxProps) {
           type="button"
           onClick={handleFormat}
           disabled={!text.trim() || isOverLimit || isBusy}
-          className="self-end rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="self-end rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {stage === 'formatting' ? 'Обробка через AI...' : stage === 'saving' ? 'Збереження...' : 'Format'}
+          {stage === 'formatting' ? 'Processing with AI...' : stage === 'saving' ? 'Saving...' : 'Format'}
         </button>
       )}
-    </div>
+    </section>
   );
 }
 

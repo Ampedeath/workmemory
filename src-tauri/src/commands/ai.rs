@@ -27,7 +27,9 @@ pub struct AiSettingsSummary {
 pub fn save_ai_settings(app: AppHandle, payload: SaveAiSettingsPayload) -> Result<(), String> {
     let store = app.store(SETTINGS_STORE).map_err(|e| e.to_string())?;
     store.set("aiBaseUrl", payload.base_url);
-    store.set("aiApiKey", payload.api_key);
+    if !payload.api_key.trim().is_empty() {
+        store.set("aiApiKey", payload.api_key);
+    }
     store.set("aiModel", payload.model);
     store.save().map_err(|e| e.to_string())?;
     Ok(())

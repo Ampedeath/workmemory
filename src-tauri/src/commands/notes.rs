@@ -1,10 +1,11 @@
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use tauri::State;
+use tauri::{AppHandle, State};
 use tauri_plugin_sql::{DbInstances, DbPool};
 use uuid::Uuid;
 use sqlx::{sqlite::SqliteRow, Row};
 
+use crate::commands::reminders;
 use crate::DB_URL;
 
 #[derive(Deserialize)]
@@ -49,6 +50,7 @@ pub struct WorkItem {
 
 #[tauri::command]
 pub async fn save_note(
+    app: AppHandle,
     db_instances: State<'_, DbInstances>,
     payload: SaveNotePayload,
 ) -> Result<WorkItem, String> {
@@ -88,6 +90,12 @@ pub async fn save_note(
     .execute(pool)
     .await
     .map_err(|e| e.to_string())?;
+
+    if let Some(due_at_raw) = &payload.due_at {
+        if let Ok(due_at) = DateTime::parse_from_rfc3339(due_at_raw) {
+            reminders::schedule_reminder(&app, id.clone(), title.clone(), due_at.with_timezone(&Utc));
+        }
+    }
 
     Ok(WorkItem {
         id,
@@ -166,6 +174,7 @@ fn row_to_work_item(row: &SqliteRow) -> Result<WorkItem, sqlx::Error> {
 
 #[tauri::command]
 pub async fn update_note_status(
+    app: AppHandle,
     db_instances: State<'_, DbInstances>,
     payload: UpdateStatusPayload,
 ) -> Result<(), String> {
@@ -193,6 +202,10 @@ pub async fn update_note_status(
     .execute(pool)
     .await
     .map_err(|e| e.to_string())?;
+
+    if payload.status != "Active" {
+        reminders::cancel_reminder(&app, &payload.id);
+    }
 
     Ok(())
 }
