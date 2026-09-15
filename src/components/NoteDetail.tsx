@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNotes } from '../hooks/useNotes';
 import type { NoteType, WorkItem } from '../types';
+import { datetimeLocalToIsoUtc, isoUtcToDatetimeLocal } from '../utils/datetime';
 
 const NOTE_TYPES: NoteType[] = ['Reminder', 'Task', 'Investigation', 'Note', 'Waiting', 'Decision'];
 
@@ -16,7 +17,7 @@ interface NoteDetailProps {
 function NoteDetail({ item, onClose, onSaved }: NoteDetailProps) {
   const [title, setTitle] = useState(item.title);
   const [type, setType] = useState<NoteType>(item.type);
-  const [dueAt, setDueAt] = useState(item.dueAt ?? '');
+  const [dueAt, setDueAt] = useState(isoUtcToDatetimeLocal(item.dueAt));
   const [action, setAction] = useState(item.action ?? '');
   const [tags, setTags] = useState(item.tags.join(', '));
   const [context, setContext] = useState(item.context ?? '');
@@ -41,7 +42,7 @@ function NoteDetail({ item, onClose, onSaved }: NoteDetailProps) {
         id: item.id,
         title,
         type,
-        dueAt: dueAt.trim() || null,
+        dueAt: datetimeLocalToIsoUtc(dueAt),
         action: action.trim() || null,
         tags: tags
           .split(',')
@@ -86,12 +87,12 @@ function NoteDetail({ item, onClose, onSaved }: NoteDetailProps) {
         </label>
 
         <label className="flex flex-col gap-1 text-sm text-slate-700">
-          Due at (ISO 8601 UTC, or leave empty)
+          Due at
           <input
+            type="datetime-local"
             value={dueAt}
             onChange={(e) => setDueAt(e.target.value)}
-            placeholder="2026-08-24T10:00:00Z"
-            className={`${INPUT_CLASS} placeholder:text-slate-400`}
+            className={INPUT_CLASS}
           />
         </label>
 
