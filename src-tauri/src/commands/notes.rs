@@ -140,7 +140,7 @@ pub async fn list_notes(
     let DbPool::Sqlite(pool) = db;
     
     let where_clause = match tab.as_str() {
-        "Today" => "status = 'Active' AND (date(due_at) = date ('now') OR date(created_at) = date('now'))",
+        "Today" => "status = 'Active' AND (date(due_at) <= date('now') OR date(created_at) = date('now'))",
         "Upcoming" => "status = 'Active' AND due_at > datetime('now', 'end of day')",
         "Waiting" => "status = 'Active' AND type = 'Waiting'",
         "Later" => "status = 'Active' AND (due_at IS NULL OR due_at > datetime('now', '+14 days'))",
