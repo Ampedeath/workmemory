@@ -26,16 +26,16 @@ function NoteCard({ item, onOpen, onMarkDone, onArchive, onDelete }: NoteCardPro
       onClick={() => onOpen(item)}
       className={`flex cursor-pointer items-start gap-3 rounded-xl border border-l-4 p-3 shadow-sm transition-shadow hover:shadow-md ${
         isOverdue
-          ? 'border-red-300 border-l-red-400 bg-red-50'
-          : `border-slate-200 bg-white ${TYPE_COLOR[item.type].accent}`
+          ? 'border-red-300 border-l-red-400 bg-red-50 dark:border-red-800 dark:border-l-red-500 dark:bg-red-950/40'
+          : `border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 ${TYPE_COLOR[item.type].accent}`
       }`}
     >
       <span className={`mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full ${TYPE_COLOR[item.type].dot}`} />
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-900">{item.title}</p>
+        <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{item.title}</p>
         {item.dueAt && (
-          <p className={`text-xs ${isOverdue ? 'font-medium text-red-600' : 'text-slate-400'}`}>
+          <p className={`text-xs ${isOverdue ? 'font-medium text-red-600 dark:text-red-400' : 'text-slate-400'}`}>
             {new Date(item.dueAt).toLocaleString()}
           </p>
         )}
@@ -51,7 +51,7 @@ function NoteCard({ item, onOpen, onMarkDone, onArchive, onDelete }: NoteCardPro
                 onMarkDone(item.id);
               }}
               title="Mark as Done"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-emerald-100 hover:text-emerald-600"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-emerald-100 hover:text-emerald-600 dark:hover:bg-emerald-900/40 dark:hover:text-emerald-400"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                 <polyline points="20 6 9 17 4 12" />
@@ -64,7 +64,7 @@ function NoteCard({ item, onOpen, onMarkDone, onArchive, onDelete }: NoteCardPro
                 onArchive(item.id);
               }}
               title="Archive"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-600 dark:hover:text-slate-200"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                 <rect x="1" y="3" width="22" height="5" />
@@ -81,7 +81,7 @@ function NoteCard({ item, onOpen, onMarkDone, onArchive, onDelete }: NoteCardPro
             onDelete(item.id);
           }}
           title="Delete"
-          className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-red-100 hover:text-red-600"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/40 dark:hover:text-red-400"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
             <polyline points="3 6 5 6 21 6" />
