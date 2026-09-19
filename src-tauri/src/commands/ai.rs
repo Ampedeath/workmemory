@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
-const SETTINGS_STORE: &str = "settings.json";
+use crate::SETTINGS_STORE;
+
 const DEFAULT_BASE_URL: &str = "https://api.groq.com/openai/v1";
 const DEFAULT_MODEL: &str = "openai/gpt-oss-20b";
 

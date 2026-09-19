@@ -9,6 +9,7 @@ use tauri_plugin_sql::{Builder as SqlBuilder, Migration, MigrationKind};
 use tauri_plugin_store::Builder as StoreBuilder;
 
 pub const DB_URL: &str = "sqlite:workmemory.db";
+pub const SETTINGS_STORE: &str = "settings.json";
 
 fn show_main_window<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("main") {
@@ -100,7 +101,9 @@ pub fn run() {
             commands::ai::save_ai_settings,
             commands::ai::get_ai_settings,
             commands::settings::get_autostart_enabled,
-            commands::settings::set_autostart_enabled
+            commands::settings::set_autostart_enabled,
+            commands::settings::get_theme,
+            commands::settings::set_theme
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { getAiSettings, saveAiSettings } from '../services/ai';
-import { getAutostartEnabled, setAutostartEnabled } from '../services/settings';
+import { getAutostartEnabled, getTheme, setAutostartEnabled, setTheme as saveTheme } from '../services/settings';
+import { applyTheme } from '../utils/theme';
+import ThemeToggle from './ThemeToggle';
+import type { ThemePreference } from '../types';
 
 const INPUT_CLASS =
-  'rounded-lg border border-slate-300 p-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+  'rounded-lg border border-slate-300 p-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100';
 
 function Settings() {
   const [baseUrl, setBaseUrl] = useState('');
@@ -15,10 +18,12 @@ function Settings() {
 
   const [autostart, setAutostart] = useState(false);
   const [isTogglingAutostart, setIsTogglingAutostart] = useState(false);
+  const [theme, setThemeState] = useState<ThemePreference>('system');
 
   useEffect(() => {
     void loadSettings();
     void getAutostartEnabled().then(setAutostart);
+    void getTheme().then(setThemeState);
   }, []);
 
   async function loadSettings() {
@@ -56,14 +61,29 @@ function Settings() {
     }
   }
 
+  async function handleThemeChange(next: ThemePreference) {
+    setThemeState(next);
+    applyTheme(next);
+    try {
+      await saveTheme(next);
+    } catch {
+      // theme still applied for this session even if persisting failed
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">General</h2>
 
         <div className="flex items-center justify-between">
+          <span className="text-sm text-slate-700 dark:text-slate-300">Theme</span>
+          <ThemeToggle value={theme} onChange={(next) => void handleThemeChange(next)} />
+        </div>
+
+        <div className="flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-sm text-slate-700">Launch on system startup</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300">Launch on system startup</span>
             <span className="text-xs text-slate-400">Start WorkMemory automatically when you log in</span>
           </div>
           <button
@@ -73,7 +93,7 @@ function Settings() {
             onClick={() => void handleToggleAutostart()}
             disabled={isTogglingAutostart}
             className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors disabled:opacity-50 ${
-              autostart ? 'bg-indigo-600' : 'bg-slate-300'
+              autostart ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'
             }`}
           >
             <span
@@ -85,10 +105,10 @@ function Settings() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">AI Settings</h2>
 
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
           Base URL
           <input
             value={baseUrl}
@@ -98,7 +118,7 @@ function Settings() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
           Model
           <input
             value={model}
@@ -108,8 +128,8 @@ function Settings() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm text-slate-700">
-          API Key {hasApiKey && <span className="text-xs font-normal text-emerald-600">(configured)</span>}
+        <label className="flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
+          API Key {hasApiKey && <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400">(configured)</span>}
           <input
             type="password"
             value={apiKey}
@@ -119,7 +139,7 @@ function Settings() {
           />
         </label>
 
-        {message && <p className="text-sm text-slate-600">{message}</p>}
+        {message && <p className="text-sm text-slate-600 dark:text-slate-400">{message}</p>}
 
         <button
           type="button"

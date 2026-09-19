@@ -2,6 +2,7 @@ export type NoteType = 'Reminder' | 'Task' | 'Investigation' | 'Note' | 'Waiting
 export type NoteStatus = 'Active' | 'Done' | 'Archived' | 'Deleted';
 export type DetailLevel = 'Quick' | 'Detailed';
 export type TabName = 'Today' | 'Upcoming' | 'Waiting' | 'Later' | 'Archive';
+export type ThemePreference = 'system' | 'light' | 'dark';
 
 export interface FormattedNote {
   title: string;
